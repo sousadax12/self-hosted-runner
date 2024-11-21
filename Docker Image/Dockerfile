@@ -25,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     python3-venv \
     python3-dev \
     python3-pip \
+    git \
     && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && apt-get install -y nodejs \
     && npm install -g npm@latest \
@@ -51,6 +52,20 @@ RUN npm install -g yarn
 # Copy the start script and make it executable
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+# Add Docker's official GPG key and repository
+RUN apt-get update && apt-get install -y ca-certificates curl gnupg
+RUN install -m 0755 -d /etc/apt/keyrings
+RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+RUN chmod a+r /etc/apt/keyrings/docker.gpg
+RUN echo \
+  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+  tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# Install Docker CLI
+RUN apt-get update && apt-get install -y docker-ce-cli
+
 
 # Switch to docker user
 USER docker
